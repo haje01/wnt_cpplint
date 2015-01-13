@@ -1666,7 +1666,7 @@ def GetHeaderGuardCPPVariable(filename):
   filename = re.sub(r'/\.flymake/([^/]*)$', r'/\1', filename)
   # Replace 'c++' with 'cpp'.
   filename = filename.replace('C++', 'cpp').replace('c++', 'cpp')
-  
+
   fileinfo = FileInfo(filename)
   file_path_from_root = fileinfo.RepositoryName()
   if _root:
@@ -3899,7 +3899,9 @@ def CheckBraces(filename, clean_lines, linenum, error):
 
   line = clean_lines.elided[linenum]        # get rid of comments and strings
 
-  if Match(r'\s*{\s*$', line):
+  if Match(r'\S+\s*{\s*$', line):
+      error(filename, linenum, 'whitespace/braces', 4,
+            '{ should almost always be at the start of the next line')
     # We allow an open brace to start a line in the case where someone is using
     # braces in a block to explicitly create a new scope, which is commonly used
     # to control the lifetime of stack-allocated variables.  Braces are also
@@ -3907,11 +3909,11 @@ def CheckBraces(filename, clean_lines, linenum, error):
     # perfectly: we just don't complain if the last non-whitespace character on
     # the previous non-blank line is ',', ';', ':', '(', '{', or '}', or if the
     # previous line starts a preprocessor block.
-    prevline = GetPreviousNonBlankLine(clean_lines, linenum)[0]
-    if (not Search(r'[,;:}{(]\s*$', prevline) and
-        not Match(r'\s*#', prevline)):
-      error(filename, linenum, 'whitespace/braces', 4,
-            '{ should almost always be at the end of the previous line')
+    #prevline = GetPreviousNonBlankLine(clean_lines, linenum)[0]
+    #if (not Search(r'[,;:}{(]\s*$', prevline) and
+        #not Match(r'\s*#', prevline)):
+      #error(filename, linenum, 'whitespace/braces', 4,
+            #'{ should almost always be at the end of the previous line')
 
   # An else clause should be on the same line as the preceding closing brace.
   if Match(r'\s*else\b\s*(?:if\b|\{|$)', line):
@@ -4394,9 +4396,11 @@ def CheckStyle(filename, clean_lines, linenum, file_extension, nesting_state,
   raw_lines = clean_lines.lines_without_raw_strings
   line = raw_lines[linenum]
 
-  if line.find('\t') != -1:
-    error(filename, linenum, 'whitespace/tab', 1,
-          'Tab found; better to use spaces')
+  #if line.find('\t') != -1:
+    #error(filename, linenum, 'whitespace/tab', 1,
+          #'Tab found; better to use spaces')
+  if Match('^    ', line):
+    error(filename, linenum, 'whitespace/tab', 1, 'Spaces found; better to use tabs')
 
   # One or three blank spaces at the beginning of the line is weird; it's
   # hard to reconcile that with 2-space indents.
@@ -4794,7 +4798,7 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
 
   # Make Windows paths like Unix.
   fullname = os.path.abspath(filename).replace('\\', '/')
-  
+
   # Perform other checks now that we are sure that this is not an include line
   CheckCasts(filename, clean_lines, linenum, error)
   CheckGlobalStatic(filename, clean_lines, linenum, error)
@@ -6034,7 +6038,7 @@ def ProcessFileData(filename, file_extension, lines, error,
   nesting_state.CheckCompletedBlocks(filename, error)
 
   CheckForIncludeWhatYouUse(filename, clean_lines, include_state, error)
-  
+
   # Check that the .cc file has included its header if it exists.
   if file_extension == 'cc':
     CheckHeaderFileIncluded(filename, include_state, error)
