@@ -4399,7 +4399,7 @@ def CheckStyle(filename, clean_lines, linenum, file_extension, nesting_state,
   #if line.find('\t') != -1:
     #error(filename, linenum, 'whitespace/tab', 1,
           #'Tab found; better to use spaces')
-  if Match('^    ', line):
+  if Match('^\s{2,}', line):
     error(filename, linenum, 'whitespace/tab', 1, 'Spaces found; better to use tabs')
 
   # One or three blank spaces at the beginning of the line is weird; it's
